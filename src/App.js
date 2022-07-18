@@ -11,17 +11,6 @@ function App() {
   const [isDead, setIsDead] = useState(false);
   const [direction, setDirection] = useState(DIRECTIONS.RIGHT);
 
-  const blocksMatrix = Array(100)
-    .fill(null)
-    .map((_, i) => i);
-
-  const spawnApple = () => {
-    let newPosition = Math.floor(Math.random() * 99);
-    while (snakePositionArray.includes(newPosition))
-      newPosition = Math.floor(Math.random() * 99);
-    setApplePosition(newPosition);
-  };
-
   const initGame = () => {
     if (isGameStart) return;
     setIsDead(false);
@@ -31,11 +20,9 @@ function App() {
     setIsGameStart(true);
   };
 
-  const handleGameStart = () => {
-    initGame();
-  };
-
-  const hasSnakeInBlock = (position) => snakePositionArray.includes(position);
+  const gameBoardArray = Array(100)
+    .fill(null)
+    .map((_, i) => i);
 
   const movePosition = (position) => {
     switch (direction) {
@@ -66,16 +53,24 @@ function App() {
     setSnakePositionArray(() => newSnakePositionArray);
   };
 
+  const isSnakeBlock = (position) => snakePositionArray.includes(position);
+
+  const spawnApple = () => {
+    let newPosition = Math.floor(Math.random() * 99);
+    while (snakePositionArray.includes(newPosition))
+      newPosition = Math.floor(Math.random() * 99);
+    setApplePosition(newPosition);
+  };
+
   const handleEatApple = () => {
     if (snakePositionArray[0] !== applePosition) return;
 
     setSnakePositionArray(() => [...snakePositionArray, tailPosition]);
-    console.log(applePosition, "eat apple", snakePositionArray);
     spawnApple();
   };
 
   const isAppleBlock = (position) => {
-    return applePosition === position && !hasSnakeInBlock(position);
+    return applePosition === position && !isSnakeBlock(position);
   };
 
   const handleKeyDown = (event) => {
@@ -144,7 +139,7 @@ function App() {
       {!isGameStart && !isDead && (
         <div className="message-board">
           <h1 className="title">SNAKE</h1>
-          <button className="start-button" onClick={handleGameStart}>
+          <button className="start-button" onClick={initGame}>
             GAME START
           </button>
         </div>
@@ -154,7 +149,7 @@ function App() {
       {isDead && (
         <div className="message-board">
           <h1 className="title">GAME OVER</h1>
-          <button className="start-button" onClick={handleGameStart}>
+          <button className="start-button" onClick={initGame}>
             GAME START
           </button>
         </div>
@@ -162,12 +157,12 @@ function App() {
 
       {/* Game play screen */}
       <section className="snake-board">
-        {blocksMatrix.map((position) => {
+        {gameBoardArray.map((position) => {
           return (
             <div
               key={position}
               className={`block ${isAppleBlock(position) && "apple-block"} ${
-                hasSnakeInBlock(position) && "snake-block"
+                isSnakeBlock(position) && "snake-block"
               } `}
             >
               &nbsp;
